@@ -1,6 +1,6 @@
 import React from 'react';
 import Error404 from './Error404';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import Play from './play';
 import DeadComponent from './DeadComponent';
 import tabaangry from '../assets/images/tabaangry.gif';
@@ -33,6 +33,8 @@ const defaultState = {
     tabasick
   },
   displayImage: tabanormal,
+  tempImage: null,
+  dead: false,
 };
 
 
@@ -75,23 +77,46 @@ class App extends React.Component {
   stateToDisplayImage() {
 
     let newState = JSON.parse(JSON.stringify(this.state));
-    if ((this.state.hunger < 7 || this.state.sleep < 4 || this.state.boredom < 5) && newState.displayImage != tabaangry) {
-      newState.displayImage = tabaangry;
-      this.setState(newState);
-    }
-    if (this.state.cleanliness < 5 && newState.poo != poo) {
-      newState.poo = poo;
-      this.setState(newState);
-    } else if (this.state.cleanliness == 10 && newState.poo != null){
-      newState.poo = null;
-      this.setState(newState);
-    }
-
-    if (this.state.hunger >= 7 &&
-      this.state.sleep >= 4 &&
-      this.state.boredom >= 5 && newState.displayImage != tabanormal) {
-      newState.displayImage = tabanormal;
-      this.setState(newState);
+    if (this.state.tempImage){
+      if (this.state.tempImage == "eat" && newState.displayImage != tabaeat){
+        newState.displayImage = tabaeat;
+        this.setState(newState);
+      }
+      if (this.state.tempImage == "heart" && newState.displayImage != tabalove){
+        newState.displayImage = tabalove;
+        this.setState(newState);
+      }
+      if (this.state.tempImage == "sing" && newState.displayImage != tabamusic){
+        newState.displayImage = tabamusic;
+        this.setState(newState);
+      }
+    }else {
+      if (this.state.cleanliness < 5 && newState.poo != poo) {
+        newState.poo = poo;
+        this.setState(newState);
+      } else if (this.state.cleanliness == 10 && newState.poo != null){
+        newState.poo = null;
+        this.setState(newState);
+      }
+      if (newState.sick == true && newState.displayImage != tabasick) {
+        newState.displayImage = tabasick;
+        this.setState(newState);
+      }
+      if (this.state.cleanliness < 1 && newState.displayImage != tabasick) {
+        newState.sick = true;
+        this.setState(newState);
+      } else if (newState.sick == false && newState.displayImage == tabasick || newState.displayImage != tabasick){
+        if ((this.state.hunger < 7 || this.state.sleep < 4 || this.state.boredom < 5) && newState.displayImage != tabaangry) {
+        newState.displayImage = tabaangry;
+        this.setState(newState);
+      }
+      if (this.state.hunger >= 7 &&
+        this.state.sleep >= 4 &&
+        this.state.boredom >= 5 && newState.displayImage != tabanormal) {
+          newState.displayImage = tabanormal;
+          this.setState(newState);
+        }
+      }
     }
   }
 
@@ -154,18 +179,50 @@ class App extends React.Component {
     this.setState(newState);
   }
 
+  setToNull(){
+      let newState = JSON.parse(JSON.stringify(this.state));
+      newState.tempImage = null;
+      this.setState(newState);
+  }
+
 
   handleStatusFill(input){
     let newState = JSON.parse(JSON.stringify(this.state));
     if (typeof newState[input] === 'number'){
       newState[input] = 10;
+      if (input == "hunger"){
+        newState.tempImage = "eat";
+        this.justFedTimer = setTimeout(() =>
+          (this.setToNull()),
+        1000
+        );
+      }
+      if (input == "cleanliness"){
+        newState.tempImage = "heart";
+        this.justCleanedTimer = setTimeout(() =>
+          (this.setToNull()),
+        1000
+        );
+      }
+      if (input == "boredom"){
+        newState.tempImage = "sing";
+        this.justFedTimer = setTimeout(() =>
+          (this.setToNull()),
+        1000
+        );
+      }
+
     } else {
       newState[input] = true;
       if (input == 'inBed') {
         this.putToSleep();
       }
+      if (input == 'sick') {
+        newState.sick = false;
+      }
     }
     this.setState(newState);
+
   }
 
 
@@ -189,17 +246,13 @@ class App extends React.Component {
 
 
   render(){
+    if (this.state.hunger < 1 && this.state.cleanliness < 1 && this.state.sleep < 1 && this.state.dead == false) {
+      this.state.dead = true;
+      return <Redirect to='/dead' />
+    }
     return (
       <div>
 
-        <div>
-          Hunger Level = {this.state.hunger} <hr/>
-          Sleep Level = {this.state.sleep} <hr/>
-          Cleanliness Level = {this.state.cleanliness} <hr/>
-          Boredom Level = {this.state.boredom} <hr/>
-          In Bed? = {this.state.inBed.toString()} <hr/>
-          Sick? = {this.state.sick.toString()} <hr/>
-        </div>
         <Switch>
           <Route exact path='/' render={()=><Play displayImage = {this.state.displayImage} poo = {this.state.poo} inBed = {this.state.inBed} onStatusFill={this.handleStatusFill} />} />
           <Route exact path='/dead' component={DeadComponent} />
