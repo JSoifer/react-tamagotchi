@@ -1,6 +1,6 @@
 import React from 'react';
 import ButtonComponent from './ButtonComponent';
-
+import PropTypes from 'prop-types';
 function ButtonContainer({ onStatusFill }) {
 
   return(
@@ -29,5 +29,9 @@ function ButtonContainer({ onStatusFill }) {
   );
 
 }
+
+ButtonContainer.propTypes = {
+  onStatusFill: PropTypes.func
+};
 
 export default ButtonContainer;

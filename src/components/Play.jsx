@@ -1,12 +1,13 @@
 import React from 'react';
 import TamaContainer from './TamaContainer';
 import ButtonContainer from './ButtonContainer';
+import PropTypes from 'prop-types';
 
-function Play({ onStatusFill, displayImage}) {
+function Play({ onStatusFill, displayImage, poo, inBed }) {
 
   return(
     <div>
-      <TamaContainer displayImage = {displayImage}/>
+      <TamaContainer displayImage = {displayImage} poo = {poo} inBed = {inBed}/>
       <ButtonContainer onStatusFill={onStatusFill}/>
 
 
@@ -14,5 +15,10 @@ function Play({ onStatusFill, displayImage}) {
   );
 
 }
-
+Play.propTypes = {
+  onStatusFill: PropTypes.func,
+  displayImage: PropTypes.string,
+  poo: PropTypes.string,
+  inBed: PropTypes.bool
+};
 export default Play;
